@@ -419,19 +419,20 @@ public class DesktopInput extends InputHandler{
                 scene.add(table);
             }
             if((input.keyDown(Binding.control) || input.shift()) && Core.input.keyTap(Binding.select)){
-                Unit on = selectedUnit();
+                Unit on = selectedUnit(true);
                 if(on != null){
-                    if (input.keyDown(Binding.control)) Call.unitControl(player, on); // Ctrl + click: control unit
+                    if (input.keyDown(Binding.control) && on.isAI()) Call.unitControl(player, on); // Ctrl + click: control unit
+                    else if (input.shift() && on.isPlayer() && !on.isLocal()) Navigation.follow(new AssistPath(on.playerNonNull())); // Shift + click player: quick assist
                     else if (on.controller() instanceof LogicAI p && p.controller != null) Spectate.INSTANCE.spectate(p.controller); // Shift + click logic unit: spectate processor
                     shouldShoot = false;
                 }
             }
         }
 
-        if(!player.dead() && !state.isPaused() && !(Core.scene.getKeyboardFocus() instanceof TextField)){
+        if(!player.dead() && !state.isPaused() && !scene.hasField()){
             updateMovement(player.unit());
 
-            if(Core.input.keyTap(Binding.respawn) && !scene.hasField()){
+            if(Core.input.keyTap(Binding.respawn)){
                 Call.unitClear(player);
                 controlledType = null;
             }

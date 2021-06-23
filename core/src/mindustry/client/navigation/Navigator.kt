@@ -2,6 +2,7 @@ package mindustry.client.navigation
 
 import arc.math.geom.*
 import mindustry.Vars.*
+import mindustry.game.*
 
 /** An abstract class for a navigation algorithm, i.e. A*.  */
 abstract class Navigator {
@@ -48,8 +49,11 @@ abstract class Navigator {
                 )
             }
         }
+        val flood = ui.join.lastHost != null && (ui.join.lastHost.modeName ?: false) == "Flood"
         return findPath(
             start, end, realObstacles.toTypedArray(), world.unitWidth().toFloat(), world.unitHeight().toFloat()
-        ) { x, y -> !(player.unit().type.canBoost || !(player.unit().solidity()?.solid(x, y) ?: false)) }
+        ) { x, y ->
+            flood && world.tiles.getc(x, y).team() == Team.blue || !player.unit().type.canBoost && player.unit().solidity()?.solid(x, y) ?: false
+        }
     }
 }
